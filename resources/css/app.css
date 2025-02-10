@@ -1,0 +1,99 @@
+/*@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Jost:wght@400;500;600;700&display=swap");*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --color-dash-bg: 232 235 238; /*209 221 237;  #D1DDED */
+        --color-dashcomponent-bg: 245 247 249; /*246 250 255;*/ /* #f6faff */
+        --color-dashcomponent-border: 255 255 255; /*162 187 224;  #A2BBE0 */
+        --color-activemenuitem-bg: 47 49 56;
+        --color-offwhite-font: 246 250 255; /* #F6FAFF */
+        --color-offblack-font: 48 48 48; /* 71 75 85; #474B55 */
+        --color-tablebutton-bg: 250 252 255; /* #FAFCFF */
+        --color-redtablebutton: 239 84 107; /* #EF546B */
+        --color-blacktablebutton: 239 84 107;
+        --color-offwhite-button: rgb(245, 247, 249);
+    }
+
+    html {
+        @apply max-w-[1440px] mx-auto min-h-full;
+    }
+
+    body {
+        @apply flex flex-col min-h-full bg-dash-bg;
+    }
+}
+
+@layer components {
+    .bg-active-black {
+        @apply bg-activemenuitem-bg;
+    }
+
+    .bg-dash-grey {
+        @apply bg-dash-bg;
+    }
+
+    .bg-component-white {
+        @apply bg-dashcomponent-bg;
+    }
+
+    .shadow-component-grey {
+        box-shadow: 0 2px 8px #b0c2decc;
+    }
+}
+
+table {
+    overflow: hidden;
+    border-radius: 6px 6px 0 0;
+
+    tbody {
+        tr {
+            height: 50px;
+            border-bottom: 1px dashed #bcbdbe; /*#b7cce7;*/
+
+            &:nth-child(even) {
+                background: #eef0f2; /*#eef3fb;*/
+            }
+
+            &:nth-child(odd) {
+                background: #e8ebed; /*#e3ebf5;*/
+            }
+        }
+    }
+
+    td,
+    th {
+        height: 100%;
+    }
+
+    thead {
+        background: #48494c;
+        color: #f9f9f6;
+        tr {
+            /*background: none;*/
+            height: 50px;
+            /*color: #9faec4;*/
+            th {
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+.textShadow {
+    text-shadow: 0 1px 2px #ce6e62;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* For Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
