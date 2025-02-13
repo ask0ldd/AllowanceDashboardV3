@@ -7,50 +7,20 @@ import { useSDK } from '@metamask/sdk-react'
 import { useEtherClientsContext } from '@/hooks/useEtherClientsContext'
 import { useModalContext } from '@/context/ModalContext'
 import { router } from '@inertiajs/react'
+import { useAccount, useConnect, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi'
 
 export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletAddress} : IProps){
 
-    const { sdk, connected } = useSDK()
+    // const { sdk, connected } = useSDK()
     const { metamaskService, localStorageService } = useServices()
     const { setWalletClient, flushWClient : flushWalletClient } = useEtherClientsContext()
     const { modal } = useModalContext()
-    /*const { walletClient, setWalletClient, flushWClient : flushWalletClient } = useEtherClientsContext()
 
-    const [walletAddress, setWalletAddress] = useState<THexAddress | null>(() => {
-        const storageAddress = localStorageService.retrieveWalletAddress()
-        return isHexAddress(storageAddress) ? storageAddress : null
-    })
-
-    // memorizing the listener for later removal
-    const handleAccountsChangedCallback = useRef<((accounts: string[]) => void) | null>(null)
-
-    // handling metamask account switching
-    useEffect(() => {
-        console.log("handleAccountsChangedCallback")
-        handleAccountsChangedCallback.current = async (accounts: string[]) => {
-            if(accounts.length && isHexAddress(accounts[0])) {
-                const _walletClient = await metamaskService.getWalletClient()
-                if(_walletClient) setWalletClient(_walletClient)
-                if(isHexAddress(_walletClient?.account?.address)) {
-                    if(walletAddress != _walletClient?.account?.address) setWalletAddress(_walletClient?.account?.address)
-                    localStorageService.storeWalletAddress(_walletClient?.account?.address)
-                }
-                return
-            }
-            setWalletAddress(null)
-            localStorageService.deleteWalletAddress()
-            flushWalletClient()
-        }
-
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', handleAccountsChangedCallback.current)
-            return () => {
-                if (window.ethereum && handleAccountsChangedCallback.current) {
-                    window.ethereum.removeListener('accountsChanged', handleAccountsChangedCallback.current)
-                }
-            }
-        }
-    }, [window.ethereum])*/
+    const { connectors, connect } = useConnect()
+    const { address } = useAccount()
+    const { disconnect } = useDisconnect()
+    const { data: ensName } = useEnsName({ address })
+    const { data: ensAvatar } = useEnsAvatar({ name: ensName! })
 
     async function handleCopyToClipboard(text : string) : Promise<void> {
         await ClipboardUtils.copy(text)
@@ -58,42 +28,14 @@ export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletA
     }
 
     async function handleConnectToMetaMaskClick() {
-        try {
-            await sdk?.disconnect()
-            const accounts = await sdk?.connect()
-            if(accounts && accounts.length && isHexAddress(accounts[0])) {
-                const _walletClient = await metamaskService.getWalletClient()
-                if(_walletClient) setWalletClient(_walletClient)
-                if(isHexAddress(_walletClient?.account?.address)) {
-                    localStorageService.storeWalletAddress(_walletClient?.account?.address)
-                    if(walletAddress != _walletClient?.account?.address) setWalletAddress(_walletClient?.account?.address)
-                }
-            }
-            router.reload()
-        } catch (err) {
-            modal.showError('Check if Metamask is not asking for your credentials.')
-            console.error("Failed to connect", err)
-        }
+        connect({ connector : connectors[0] })
     }
-
-    /*useEffect(() => {
-        async function reconnect(){
-            await sdk?.connect()
-            await metamaskService.getWalletClient()
-        }
-        console.log(walletAddress)
-        console.log(walletClient?.account?.address)
-        if(localStorageService.retrieveWalletAddress() && !walletClient?.account?.address) reconnect()
-    }, [])*/
 
     function handleDisconnect(){
-        if(sdk) sdk?.terminate()
-        localStorageService.fullFlush()
-        localStorageService.deleteWalletAddress()
-        flushWalletClient()
+        disconnect()
     }
 
-    if(!walletAddress/*!walletClient?.account?.address*/) return (
+    if(!address) return (
         <div className='p-3 text-[18px] font-semibold w-[100%] h-[80px] max-w-[320px] bg-component-white flex flex-row rounded-3xl text-[#FFFFFF] justify-center items-center' onClick={handleConnectToMetaMaskClick}>
             <div className='cursor-pointer gap-x-[15px] shadow-[0_2px_4px_#5B93EC40,0_4px_8px_#5B93EC40] w-[100%] h-[100%] bg-gradient-to-r from-[#303030] to-[#4C5054] rounded-[16px] flex flex-row justify-center items-center hover:shadow-[inset_0_1px_2px_#000000aa,_inset_0_2px_4px_#000000aa] hover:from-[hsl(0,0%,30%)] hover:to-[hsl(210,5%,40%)] hover:border-solid hover:border-[3px] hover:border-[#303030]'>
                 <img src={walletIcon} alt="Wallet Icon"/>
@@ -113,7 +55,7 @@ export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletA
                         <span className='tracking-wider'>YOUR METAMASK WALLET IS ACTIVE.</span>
                     </div>
                     <hr className='mb-[2px]'/>
-                    <span className='cursor-copy hover:bg-[#e8ebed]'>{walletAddress ?? localStorageService.retrieveWalletAddress() ?? ""}</span>
+                    <span className='cursor-copy hover:bg-[#e8ebed]'>{address ?? "" /*walletAddress ?? localStorageService.retrieveWalletAddress() ?? ""*/}</span>
                 </div>
             </div>
             <button className='flex flex-col border-[3px] border-solid border-[#000000AA] gap-y-[3px] pt-[1px] justify-center items-center flex-shrink-0 flex-grow-0 bg-gradient-to-r from-[#303030] to-[#4C5054]  w-[80px] h-[80px] rounded-[16px] shadow-[0_2px_4px_#A8B0BD70,0_4px_8px_#A8B0BD60] hover:from-[hsl(0,0%,30%)] hover:to-[hsl(210,5%,40%)] hover:shadow-[inset_0_1px_2px_#000000,_inset_0_2px_4px_#000000,0_2px_0_#FFFFFF] hover:border-offblack hover:border-[2px]' onClick={handleDisconnect}>

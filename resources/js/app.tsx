@@ -1,14 +1,18 @@
 import { createRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
 import { ServicesProvider } from './context/ServicesContext'
-import { MetaMaskProvider } from '@metamask/sdk-react'
 import { EtherClientsProvider } from './context/EtherClientsContext'
 import { SnackbarProvider } from './hooks/useSnackbar'
 import DashboardLayout from './Layouts/DashboardLayout'
+import { WagmiProvider } from 'wagmi'
+import { config } from './Config/WalletConfig'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 export type Page<T = {}> = React.FC<T> & {
   layout?: (page: React.ReactNode) => React.ReactElement;
 }
+
+const queryClient = new QueryClient()
 
 createInertiaApp({
   resolve: name => { // persistent layout
@@ -21,25 +25,17 @@ createInertiaApp({
   },
   setup({ el, App, props }) {
     createRoot(el).render(
-      <MetaMaskProvider debug={false} sdkOptions={{
-        logging:{
-            developerMode: false,
-          },
-        // communicationServerUrl: process.env.REACT_APP_COMM_SERVER_URL,
-        checkInstallationImmediately: false,
-        dappMetadata: {
-          name: "Allowance Revocation App",
-          // url: window.location.host,
-        }
-      }}>
-          <EtherClientsProvider>
-            <ServicesProvider>
-              <SnackbarProvider>
-                <App {...props} />
-              </SnackbarProvider>
-            </ServicesProvider>
-          </EtherClientsProvider>
-      </MetaMaskProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}> 
+            <EtherClientsProvider>
+              <ServicesProvider>
+                <SnackbarProvider>
+                  <App {...props} />
+                </SnackbarProvider>
+              </ServicesProvider>
+            </EtherClientsProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
     )
   },
 })
