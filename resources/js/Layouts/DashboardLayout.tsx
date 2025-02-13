@@ -13,11 +13,13 @@ import WaitingConfirmation from "@/Components/Modale/WaitingConfirmation";
 import TransactionSuccess from "@/Components/Modale/TransactionSuccess";
 import TransactionFailure from "@/Components/Modale/TransactionFailure";
 import useEcho from "@/hooks/useEcho";
-import { THexAddress } from "@/types/THexAddress";
-import { isHexAddress } from "@/types/typeguards";
 import useModalManager from "@/hooks/useModalManager";
 import React from "react";
 import { ModalProvider } from "@/context/ModalContext";
+import { useAccount, useAccountEffect, useWalletClient } from "wagmi";
+import { watchAccount } from '@wagmi/core'
+import { config } from "@/Config/WalletConfig";
+import useDashboardControls from "@/hooks/useDashboardControls";
 
 export default function DashboardLayout({ children }: IProps) {
 
@@ -25,18 +27,17 @@ export default function DashboardLayout({ children }: IProps) {
     const { setSnackbarMessage } = useSnackbar()
     const modal = useModalManager({initialVisibility : false, initialModalContentId : 'error'})
 
-    const { erc20TokenService, metamaskService, localStorageService } = useServices()
-    const { walletClient, setWalletClient, publicClient, flushWClient : flushWalletClient, addressRef } = useEtherClientsContext()
-
-    const [walletAddress, setWalletAddress] = useState<THexAddress | null>(walletClient?.account?.address ?? null /*(() => {
-        const storageAddress = localStorageService.retrieveWalletAddress()
-        return isHexAddress(storageAddress) ? storageAddress : null
-    })*/)
+    const { erc20TokenService } = useServices()
+    const { publicClient, addressRef } = useEtherClientsContext()
+    const { updateDashboard, resetValue } = useDashboardControls()
 
     // Include the wallet address in each router request and automatically close the waiting confirmation modal upon page transitions
     const removeRouterEventListener = useRef<VoidFunction | null>(null)
-    useEffect(() => {
+    /*useEffect(() => {
+        addressRef.current = address ?? null
+
         const callback = (event: { detail: { visit: { headers: Record<string, string | null> } } }) => {
+            console.log("address_cb")
             event.detail.visit.headers = {
                 ...event.detail.visit.headers,
                 'walletAddress': addressRef.current ?? null
@@ -49,7 +50,36 @@ export default function DashboardLayout({ children }: IProps) {
         return () => {
             if(removeRouterEventListener.current) removeRouterEventListener.current()
         }
-    }, [addressRef.current, modal.contentId])
+    }, [address, modal.contentId])*/
+
+    useAccountEffect({
+        onDisconnect() {
+          if(removeRouterEventListener.current) removeRouterEventListener.current()
+        },
+    })
+
+    useEffect(() => {
+        const unwatch = watchAccount(config, {
+            onChange(data) {
+                if(removeRouterEventListener.current) removeRouterEventListener.current()
+    
+                const callback = (event: { detail: { visit: { headers: Record<string, string | null> } } }) => {
+                    console.log(data.address)
+                    event.detail.visit.headers = {
+                        ...event.detail.visit.headers,
+                        'walletAddress': data.address ?? null
+                    }
+                    if(modal.contentId == "waitingConfirmation") modal.close()
+                }
+            
+                removeRouterEventListener.current = router.on('before', callback)
+    
+                updateDashboard({...resetValue})
+            },
+        })
+
+        return unwatch
+    }, [])
    
     // webSocket event listeners intercepting transaction resolution messages
     useEffect(() => {
@@ -120,10 +150,10 @@ export default function DashboardLayout({ children }: IProps) {
     }, [modal.visibility])
 
     // memorizing the listener for later removal
-    const handleAccountsChangedCallback = useRef<((accounts: string[]) => void) | null>(null)
+    // const handleAccountsChangedCallback = useRef<((accounts: string[]) => void) | null>(null)
 
     // handling metamask account switching
-    useEffect(() => {
+    /*useEffect(() => {
         handleAccountsChangedCallback.current = async (accounts: string[]) => {
             if(accounts.length && isHexAddress(accounts[0])) {
                 // console.log("handleAccountsChangedCallback inside")
@@ -154,14 +184,14 @@ export default function DashboardLayout({ children }: IProps) {
                 }
             }
         }
-    }, [window.ethereum])
+    }, [window.ethereum])*/
 
     return(
         <ModalProvider modal={modal}>
             <div className='bg-dash-grey w-full h-full min-h-full flex flex-col font-jost'>
                 <Snackbar/>
                 <Head title="Dashboard" />
-                <Header key={'headerKey'} setSnackbarMessage={setSnackbarMessage} walletAddress={walletAddress} setWalletAddress={setWalletAddress}/>
+                <Header key={'headerKey'} setSnackbarMessage={setSnackbarMessage}/>
                 <main className="flex flex-row justify-between gap-x-[30px]">
                     {children}
                 </main>

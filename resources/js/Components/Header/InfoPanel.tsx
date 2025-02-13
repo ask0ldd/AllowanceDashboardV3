@@ -1,26 +1,20 @@
 import metamaskLogo from '@/assets/images/metamask.svg'
 import walletIcon from '@/assets/icons/walleticon.png'
 import { useServices } from '@/hooks/useServices'
-import { isHexAddress } from '@/types/typeguards'
 import ClipboardUtils from '@/utils/ClipboardUtils'
-import { useSDK } from '@metamask/sdk-react'
-import { useEtherClientsContext } from '@/hooks/useEtherClientsContext'
 import { useModalContext } from '@/context/ModalContext'
-import { router } from '@inertiajs/react'
 import { useAccount, useConnect, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi'
 
-export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletAddress} : IProps){
+export default function InfoPanel({setSnackbarMessage} : IProps){
 
-    // const { sdk, connected } = useSDK()
-    const { metamaskService, localStorageService } = useServices()
-    const { setWalletClient, flushWClient : flushWalletClient } = useEtherClientsContext()
+    const { localStorageService } = useServices()
     const { modal } = useModalContext()
 
     const { connectors, connect } = useConnect()
-    const { address } = useAccount()
+    const { address, isConnecting, isDisconnected, isConnected } = useAccount()
     const { disconnect } = useDisconnect()
-    const { data: ensName } = useEnsName({ address })
-    const { data: ensAvatar } = useEnsAvatar({ name: ensName! })
+    /*const { data: ensName } = useEnsName({ address })
+    const { data: ensAvatar } = useEnsAvatar({ name: ensName! })*/
 
     async function handleCopyToClipboard(text : string) : Promise<void> {
         await ClipboardUtils.copy(text)
@@ -35,7 +29,7 @@ export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletA
         disconnect()
     }
 
-    if(!address) return (
+    if(!isConnected) return (
         <div className='p-3 text-[18px] font-semibold w-[100%] h-[80px] max-w-[320px] bg-component-white flex flex-row rounded-3xl text-[#FFFFFF] justify-center items-center' onClick={handleConnectToMetaMaskClick}>
             <div className='cursor-pointer gap-x-[15px] shadow-[0_2px_4px_#5B93EC40,0_4px_8px_#5B93EC40] w-[100%] h-[100%] bg-gradient-to-r from-[#303030] to-[#4C5054] rounded-[16px] flex flex-row justify-center items-center hover:shadow-[inset_0_1px_2px_#000000aa,_inset_0_2px_4px_#000000aa] hover:from-[hsl(0,0%,30%)] hover:to-[hsl(210,5%,40%)] hover:border-solid hover:border-[3px] hover:border-[#303030]'>
                 <img src={walletIcon} alt="Wallet Icon"/>
@@ -49,7 +43,7 @@ export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletA
                 <div className='flex justify-center flex-grow-0 items-center bg-gradient-to-r from-[#303030] to-[#4C5054] border-[1px] shadow-[0_2px_4px_#5B93EC40,0_4px_8px_#5B93EC40] border-solid border-[hsl(225,3%,20%)] w-[64px] h-[64px] rounded-[16px]'>
                     <img key="metamask-logo" width='42px' src={metamaskLogo} alt="MetaMask Logo"/>
                 </div>
-                <div className='flex flex-col text-[14px] text-[#303030] gap-y-[5px]' onClick={() => handleCopyToClipboard(walletAddress ?? localStorageService.retrieveWalletAddress() ?? "")}>
+                <div className='flex flex-col text-[14px] text-[#303030] gap-y-[5px]' onClick={() => handleCopyToClipboard(address ?? localStorageService.retrieveWalletAddress() ?? "")}>
                     <div className='font-semibold text-[15px] font-oswald text-[#BCC2C8] flex items-center gap-x-[10px] my-[2px]'>
                         <div className='w-[11px] h-[11px] bg-green-400 rounded-full translate-y-[1px]'></div>
                         <span className='tracking-wider'>YOUR METAMASK WALLET IS ACTIVE.</span>
@@ -77,21 +71,9 @@ export default function InfoPanel({setSnackbarMessage, walletAddress, setWalletA
 }
 
 interface IProps{
-    /*modal : {
-            visibility: boolean
-            setVisibility: React.Dispatch<React.SetStateAction<boolean>>
-            close: () => void
-            contentId : string
-            setContentId : React.Dispatch<React.SetStateAction<string>>
-            setStatus : ({ visibility, contentId }: { visibility: boolean, contentId?: string}) => void
-            showError : (errorMessage: string) => void
-            showInjectionModal : (injectedChild: ReactNode) => void
-            errorMessageRef : React.RefObject<string>
-            injectedComponentRef : React.RefObject<React.ReactNode>
-    },*/
     setSnackbarMessage : React.Dispatch<React.SetStateAction<string | null>>
-    walletAddress : `0x${string}` | null
-    setWalletAddress : React.Dispatch<React.SetStateAction<`0x${string}` | null>>
+    /*walletAddress : `0x${string}` | null
+    setWalletAddress : React.Dispatch<React.SetStateAction<`0x${string}` | null>>*/
 }
 
     

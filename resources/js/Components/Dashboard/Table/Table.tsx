@@ -12,6 +12,7 @@ import { useEtherClientsContext } from '@/hooks/useEtherClientsContext'
 import { EthereumClientNotFoundError } from '@/errors/EthereumClientNotFoundError'
 import IFormAllowance from '@/types/IFormAllowance'
 import { useModalContext } from '@/context/ModalContext'
+import { useWalletClient } from 'wagmi'
 
 export default function Table({allowances, setSnackbarMessage} : IProps){
 
@@ -20,7 +21,8 @@ export default function Table({allowances, setSnackbarMessage} : IProps){
     const {modal} = useModalContext()
     const {handleSetAllowanceErrors} = useErrorHandler(modal.showError)
 
-    const { publicClient, walletClient } = useEtherClientsContext()
+    const { publicClient } = useEtherClientsContext()
+    const { data: walletClient } = useWalletClient()
 
     async function handleCopyToClipboard(text : string) : Promise<void> {
         await ClipboardUtils.copy(text)

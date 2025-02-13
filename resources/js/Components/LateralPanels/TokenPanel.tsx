@@ -4,11 +4,13 @@ import { useServices } from "@/hooks/useServices"
 import { ITokenContract } from "@/types/ITokenContract"
 import { useEffect, useState } from "react"
 import { useEtherClientsContext } from "@/hooks/useEtherClientsContext"
+import { useWalletClient } from "wagmi"
 
 function TokenPanel({ownedTokens, setSnackbarMessage} : { ownedTokens : ITokenContract[], setSnackbarMessage : React.Dispatch<React.SetStateAction<string | null>>}){
 
     const { erc20TokenService } = useServices()
-    const { publicClient, walletClient } = useEtherClientsContext()
+    const { publicClient } = useEtherClientsContext()
+    const { data: walletClient } = useWalletClient()
 
     const [balances, setBalances] = useState<Record<THexAddress, bigint> | null>(null)
 

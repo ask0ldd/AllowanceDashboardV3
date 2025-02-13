@@ -17,6 +17,7 @@ import { EthereumClientNotFoundError } from "@/errors/EthereumClientNotFoundErro
 import useSnackbar from "@/hooks/useSnackbar";
 import IFormAllowance from "@/types/IFormAllowance";
 import { useModalContext } from "@/context/ModalContext";
+import { useWalletClient } from "wagmi";
 
 export default function Allowance() {
 
@@ -25,11 +26,11 @@ export default function Allowance() {
     const [symbol, setSymbol] = useState<string | null>(null)
 
     const { modal } = useModalContext();
-    // const modal = useModalManager({initialVisibility : false, initialModalContentId : "error"})
     const { setSnackbarMessage } = useSnackbar()
     // centralizing viem errors management
     const { handleSetAllowanceErrors } = useErrorHandler(modal.showError)
-    const { publicClient, walletClient } = useEtherClientsContext()
+    const { publicClient } = useEtherClientsContext()
+    const { data : walletClient } = useWalletClient()
 
     const mode = useRef<string>(existingAllowance ? 'edit' : 'new')
 

@@ -5,7 +5,7 @@ import { injected, metaMask, safe, walletConnect } from 'wagmi/connectors'
 const projectId = 'Revoke Allowance Prj'
 
 export const config = createConfig({
-  chains: [holesky, base],
+  chains: [holesky],
   connectors: [
     injected(),
     walletConnect({ projectId }),
@@ -14,6 +14,5 @@ export const config = createConfig({
   ],
   transports: {
     [holesky.id]: http(),
-    [base.id]: http(),
   },
 })

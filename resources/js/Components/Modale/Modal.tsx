@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ReactNode, useEffect, useRef } from 'react'
 import './Modal.css'
-import topmodal from '@/assets/topmodal4.png'
 
-function Modal({children, modalVisibility, setModalStatus, /*modalContent,*/ containerCSSClass, width} : IProps){
+function Modal({children, modalVisibility, setModalStatus, containerCSSClass, width} : IProps){
 
     const dialogRef = useRef<HTMLDialogElement>(null)
     const modalVisibilityRef = useRef<boolean>(modalVisibility)
