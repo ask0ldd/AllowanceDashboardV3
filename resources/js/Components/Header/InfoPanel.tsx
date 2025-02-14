@@ -49,7 +49,7 @@ export default function InfoPanel({setSnackbarMessage} : IProps){
                         <span className='tracking-wider'>YOUR METAMASK WALLET IS ACTIVE.</span>
                     </div>
                     <hr className='mb-[2px]'/>
-                    <span className='cursor-copy hover:bg-[#e8ebed]'>{address ?? "" /*walletAddress ?? localStorageService.retrieveWalletAddress() ?? ""*/}</span>
+                    <span className='cursor-copy hover:bg-[#e8ebed]'>{address ?? ""}</span>
                 </div>
             </div>
             <button className='flex flex-col border-[3px] border-solid border-[#000000AA] gap-y-[3px] pt-[1px] justify-center items-center flex-shrink-0 flex-grow-0 bg-gradient-to-r from-[#303030] to-[#4C5054]  w-[80px] h-[80px] rounded-[16px] shadow-[0_2px_4px_#A8B0BD70,0_4px_8px_#A8B0BD60] hover:from-[hsl(0,0%,30%)] hover:to-[hsl(210,5%,40%)] hover:shadow-[inset_0_1px_2px_#000000,_inset_0_2px_4px_#000000,0_2px_0_#FFFFFF] hover:border-offblack hover:border-[2px]' onClick={handleDisconnect}>
@@ -72,8 +72,6 @@ export default function InfoPanel({setSnackbarMessage} : IProps){
 
 interface IProps{
     setSnackbarMessage : React.Dispatch<React.SetStateAction<string | null>>
-    /*walletAddress : `0x${string}` | null
-    setWalletAddress : React.Dispatch<React.SetStateAction<`0x${string}` | null>>*/
 }
 
     

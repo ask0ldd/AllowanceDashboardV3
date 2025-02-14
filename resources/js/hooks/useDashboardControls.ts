@@ -47,9 +47,9 @@ export default function useDashboardControls(){
 
     useEffect(() => {
         console.log("debounce")
-        debouncedSearch(filters.searchValue);
-        return () => debouncedSearch.cancel();
-    }, [filters.searchValue/*, debouncedSearch*/]);
+        debouncedSearch(filters.searchValue)
+        return () => debouncedSearch.cancel()
+    }, [filters.searchValue])
 
     const resetValue = {showRevoked : false, showUnlimitedOnly: false, searchValue : ""}
 
