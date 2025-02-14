@@ -29,28 +29,22 @@ export default function DashboardLayout({ children }: IProps) {
 
     const { erc20TokenService } = useServices()
     const { publicClient, addressRef } = useEtherClientsContext()
-    const { updateDashboard, resetValue } = useDashboardControls()
+
+    const resetValue = {showRevoked : false, showUnlimitedOnly: false, searchValue : ""}
+    const updateDashboard = (params : {showRevoked : boolean, searchValue : string, showUnlimitedOnly : boolean,}) => {
+        router.get(route('dashboard'), {
+            ...params,
+        }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+            preserveUrl: true,
+            only: ['allowances', 'flash', 'success'],
+        })
+    }
 
     // Include the wallet address in each router request and automatically close the waiting confirmation modal upon page transitions
     const removeRouterEventListener = useRef<VoidFunction | null>(null)
-    /*useEffect(() => {
-        addressRef.current = address ?? null
-
-        const callback = (event: { detail: { visit: { headers: Record<string, string | null> } } }) => {
-            console.log("address_cb")
-            event.detail.visit.headers = {
-                ...event.detail.visit.headers,
-                'walletAddress': addressRef.current ?? null
-            }
-            if(modal.contentId == "waitingConfirmation") modal.close()
-        }
-    
-        removeRouterEventListener.current = router.on('before', callback)
-    
-        return () => {
-            if(removeRouterEventListener.current) removeRouterEventListener.current()
-        }
-    }, [address, modal.contentId])*/
 
     useAccountEffect({
         onDisconnect() {
@@ -58,13 +52,14 @@ export default function DashboardLayout({ children }: IProps) {
         },
     })
 
+    const firstCall = useRef(false)
     useEffect(() => {
+        if(firstCall.current) return
         const unwatch = watchAccount(config, {
             onChange(data) {
                 if(removeRouterEventListener.current) removeRouterEventListener.current()
     
                 const callback = (event: { detail: { visit: { headers: Record<string, string | null> } } }) => {
-                    console.log(data.address)
                     event.detail.visit.headers = {
                         ...event.detail.visit.headers,
                         'walletAddress': data.address ?? null
@@ -77,6 +72,8 @@ export default function DashboardLayout({ children }: IProps) {
                 updateDashboard({...resetValue})
             },
         })
+        
+        firstCall.current = true
 
         return unwatch
     }, [])
